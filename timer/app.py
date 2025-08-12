@@ -1,0 +1,183 @@
+from flask import Flask, render_template, session, request, jsonify, redirect
+from flask_session import Session
+import sqlite3
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+from calendar import monthrange, month_name 
+
+DATABASE = "database.db"
+
+def query_db(query, args=(), one=False):
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row  # Makes rows behave like dicts
+    cur = conn.execute(query, args)
+    rows = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return (dict(rows[0]) if rows else None) if one else [dict(row) for row in rows]
+
+def insert_db(query, args=()):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(query, args)
+    conn.commit()
+    conn.close()
+
+app = Flask(__name__)
+
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
+@app.route("/")
+def index():
+    return render_template("index.html") 
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmpassword = request.form.get("confirmpassword")
+
+        if password != confirmpassword:
+            return render_template("register.html", error="Passwords do not match.")
+        elif not username or not password:
+            return render_template("register.html", error="Username and password cannot be empty.")
+        elif query_db("SELECT * FROM users WHERE username = ?", (username,), one=True):
+            return render_template("register.html", error="Username already exists.")
+        
+        insert_db("INSERT INTO users (username, hash) VALUES (?, ?)",(username, generate_password_hash(password)))
+
+        session['id'] = query_db("SELECT id FROM users WHERE username = ?", [username], one=True)['id']
+        return redirect("/")
+        
+    
+    else:
+        return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    
+    if request.method == "POST":
+        session.clear()
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if not username or not password:
+            return render_template("login.html", error="Username and password cannot be empty.")
+        user = query_db("SELECT * FROM users WHERE username = ?", (username,), one=True)
+        if not user:
+            return render_template("login.html", error="User not found.")
+        if not check_password_hash(user['hash'], password):
+            return render_template("login.html", error="Incorrect password.")
+        session['id'] = user['id']
+        return redirect("/")
+    else:
+        return render_template("login.html")
+
+@app.route("/update_timer")
+def update_timer():
+    minutes = request.args.get('minutes')
+    seconds = request.args.get('seconds')
+    session['lastminutes'] = minutes
+    session['lastseconds'] = seconds
+    return {"status": "success"}
+
+@app.route("/end_timer")
+def get_timer():
+    if session['id']:
+        totaltime = int(session["lastminutes"]) * 60 + int(session["lastseconds"])/60
+        time = datetime.now()
+        insert_db("INSERT INTO history (id , timedate, length) VALUES (?, ?, ?)", (session['id'], time, totaltime))
+    return jsonify({"status": "success", "minutes": session['lastminutes'] , "seconds": session['lastseconds']})
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+@app.route("/hourly_data")
+def hourly_data():
+    data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
+    hourly_data = [0] * 24 
+    total = 0.01
+    for i in data:
+        total += i['length']
+    for i in data:
+        hourly_data[int(i['timedate'].split(" ")[1][:2])] += round(i['length']/total *100)
+        
+    labels = [f"{i}:00" for i in range(24)]
+    
+    return jsonify({"dataset":hourly_data, "labels": labels})
+
+@app.route("/stats")
+def stats():
+    data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
+    total = sum(i['length'] for i in data)
+    average = total / len(data) if data else 0
+    total = round(total)
+    average = round(average)
+    return render_template("stats.html", total=total , average=average)
+
+
+@app.route("/month_data", methods=["GET"])
+def month_data():
+    month = request.args.get('month')
+    data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
+    month_data = [0] * monthrange(datetime.now().year, int(month))[1]  # Days in the month
+    for i in data:
+        if int(i['timedate'].split("-")[1][:2]) == int(month):
+            month_data[int(i['timedate'].split("-")[2][:2])-1] += round(i['length'])
+        
+    labels = [f"{month}/{i}" for i in range(1, len(month_data)+1)]
+    
+    return jsonify({"dataset":month_data, "labels": labels})
+
+@app.route("/year_data", methods=["GET"])
+def year_data():
+    year = request.args.get('year')
+    data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
+    year_data = [0] * 12
+    for i in data:
+        if int(i['timedate'].split("-")[0]) == int(year):
+          year_data[int(i['timedate'].split("-")[1][:2])-1] += round(i['length'])
+        
+    labels = [month_name[i] for i in range(1,13)]
+    
+    return jsonify({"dataset":year_data, "labels": labels})
+
+
+
+@app.route("/invite_friend", methods=["GET", "POST"])
+def invite_friend():
+    if request.method == "POST":
+        id = query_db("SELECT id FROM users WHERE username = ?", (request.form.get("username"),), one=True)
+        if not id:
+            return render_template("friends.html", error="User not found.")
+        insert_db("INSERT INTO friends (ID1, ID2, accepted) VALUES (?, ?, ?)", (session['id'], id['id'],0))
+
+        return render_template("friends.html", success="Friend request sent.")
+    
+
+@app.route("/accept_friend", methods=["GET", "POST"])
+def accept_friend():
+    if request.method == "POST":
+        insert_db("UPDATE friends SET accepted = 1 WHERE ID1 = ? AND ID2 = ?", (request.form.get("id"), session['id']))
+    return 200
+
+@app.route("/view_invites")
+def view_invites():
+    ids = query_db("SELECT ID1 FROM friends WHERE ID2 = ? AND accepted = 0", (session['id'],))
+    users = [query_db("SELECT username,id FROM users WHERE id = ?", (i['ID1'],)) for i in ids]
+    return jsonify(users)
+
+@app.route("/view_friends")
+def view_friends():
+    ids = query_db("SELECT ID1 FROM friends WHERE ID2 = ? AND accepted = 1", (session['id'],))
+    users = [query_db("SELECT username,id FROM users WHERE id = ?", (i['ID1'],)) for i in ids]
+    return jsonify(users)
+
+@app.route("/friends")
+def friends():
+    return render_template("friends.html")

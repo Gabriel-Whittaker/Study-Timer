@@ -1,0 +1,28 @@
+#timer
+{
+    margin: 5px;
+    font-size: 120px;
+    color : white;
+    /* padding: 10px; */
+}
+#dropdown
+ {
+    margin: 5px;
+} 
+
+/* #timercontainer
+{
+    /* background-color: darkolivegreen; */
+body
+{
+    background-color: cornflowerblue;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    /* horizontal */
+    align-items: center;
+    /* vertical */
+    min-height: 100vh;
+}

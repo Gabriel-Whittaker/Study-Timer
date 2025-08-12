@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+
+  <h2 style="text-align: center; color: white;">Stats</h2>
+
+<!-- <div class = "d-flex justify-content-center"> -->
+<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" >
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+    <div style="width: 700px; height: 500px;" class="d-none d-md-block">
+        <canvas id="hourlychart"></canvas>
+    </div>
+      <div class="carousel-caption d-none d-md-block">
+        <h5>Distrubtion of study time</h5>
+        <p>% of total time studying each hour of the day</p>
+      </div>
+    </div>
+    <div class="carousel-item">
+    <div style="width: 700px; height: 500px;">
+        <canvas id="monthchart"></canvas>
+    </div>
+      <div class="carousel-caption d-none d-md-block">
+        <h5>Monthly breakdown</h5>
+        <p>Time studied each day </p>
+      </div>
+    </div>
+    <div class="carousel-item">
+    <div style="width: 700px; height: 500px;">
+        <canvas id="yearchart"></canvas>
+    </div>
+      <div class="carousel-caption d-none d-md-block">
+        <h5>Yearly breakdown</h5>
+        <p>Time studied each month</p>
+      </div>
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+</div>
+
+<h3 style="text-align: center; color: white;">Total: {{total}} minutes</h3>
+<h3 style="text-align: center; color: white;">Average: {{average}} minutes</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+    async function fetchData(id, name, args, units) {
+        const ctx = document.getElementById(id);
+        let data = await (fetch(`/${name}?${args}`));
+        data = await data.json();
+        console.log(data);
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets:// data.dataset
+                    [{
+                        label: `${units} Studied`,
+                        data: data.dataset,
+                        borderWidth: 1
+                    }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    Chart.defaults.backgroundColor = '#94D0F5';
+    Chart.defaults.borderColor = '#367fEB';
+    Chart.defaults.color = '#FFFFFF';
+    fetchData("hourlychart","hourly_data", null, "Percentage");
+    fetchData("monthchart", "month_data", "month=8", "Minutes");
+    fetchData("yearchart", "year_data", "year=2025", "Minutes");
+</script>
+{% endblock %}

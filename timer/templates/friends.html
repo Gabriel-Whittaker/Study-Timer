@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<script src="/static/friends.js"></script>
+
+{% if error%}
+{{ error }}
+{% endif %}
+
+{% if success %}
+{{ success }}
+{% endif %}
+
+
+<ul id="friendslist">
+    
+
+
+</ul>
+
+<form action="/invite_friend" method="POST">
+    <input type="text" name="username" placeholder="Enter username to invite">
+    <button type="submit" class="btn btn-primary">Invite</button>
+</form>
+
+
+
+
+
+{% endblock %}
