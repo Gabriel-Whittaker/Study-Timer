@@ -174,7 +174,7 @@ def view_invites():
 
 @app.route("/view_friends")
 def view_friends():
-    ids = query_db("SELECT ID1 FROM friends WHERE ID2 = ? AND accepted = 1", (session['id'],))
+    ids = query_db("SELECT ID1 FROM friends WHERE ID2 = ? OR ID1 = ? AND accepted = 1", (session['id'],session['id']))
     users = [query_db("SELECT username,id FROM users WHERE id = ?", (i['ID1'],)) for i in ids]
     return jsonify(users)
 
