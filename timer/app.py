@@ -155,6 +155,9 @@ def invite_friend():
         id = query_db("SELECT id FROM users WHERE username = ?", (request.form.get("username"),), one=True)
         if not id:
             return render_template("friends.html", error="User not found.")
+        
+        if query_db("SELECT * FROM friends WHERE (ID1 = ? AND ID2 = ?) OR (ID1 = ? AND ID2 = ?)",(session["id"], id["id"], id["id"], session["id"])):
+            return render_template("friends.html", error ="user invited/friend") 
         insert_db("INSERT INTO friends (ID1, ID2, accepted) VALUES (?, ?, ?)", (session['id'], id['id'],0))
 
         return render_template("friends.html", success="Friend request sent.")
@@ -164,19 +167,27 @@ def invite_friend():
 def accept_friend():
     if request.method == "POST":
         insert_db("UPDATE friends SET accepted = 1 WHERE ID1 = ? AND ID2 = ?", (request.form.get("id"), session['id']))
-    return 200
+    return render_template("friends.html", sucess= "accepted")
 
 @app.route("/view_invites")
 def view_invites():
     ids = query_db("SELECT ID1 FROM friends WHERE ID2 = ? AND accepted = 0", (session['id'],))
-    users = [query_db("SELECT username,id FROM users WHERE id = ?", (i['ID1'],)) for i in ids]
+    users = [query_db("SELECT username,id FROM users WHERE id = ?", (i['ID1'],), one= True) for i in ids]
     return jsonify(users)
 
 @app.route("/view_friends")
 def view_friends():
-    ids = query_db("SELECT ID1 FROM friends WHERE ID2 = ? OR ID1 = ? AND accepted = 1", (session['id'],session['id']))
-    users = [query_db("SELECT username,id FROM users WHERE id = ?", (i['ID1'],)) for i in ids]
-    return jsonify(users)
+    ids = query_db("SELECT ID1,ID2 FROM friends WHERE (ID2 = ? OR ID1 = ?) AND accepted = 1", (session['id'],session['id']))
+    users = [query_db("SELECT username,id FROM users WHERE id IN (?,?)", (i['ID1'],i["ID2"])) for i in ids]
+    friends = []
+    
+    for i in users:
+        for h in i:
+            print(i)
+            if h["id"] != session["id"]:
+            
+                friends.append(h)
+    return jsonify(friends)
 
 @app.route("/friends")
 def friends():
