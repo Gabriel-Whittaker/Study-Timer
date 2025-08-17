@@ -2,7 +2,7 @@ from flask import Flask, render_template, session, request, jsonify, redirect
 from flask_session import Session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 from calendar import monthrange, month_name 
 
 DATABASE = "database.db"
@@ -183,7 +183,7 @@ def view_friends():
     
     for i in users:
         for h in i:
-            print(i)
+            
             if h["id"] != session["id"]:
             
                 friends.append(h)
@@ -192,3 +192,21 @@ def view_friends():
 @app.route("/friends")
 def friends():
     return render_template("friends.html")
+
+@app.route("/weekly_leaderboard")
+def weekly_leaderboard():
+    weekago = datetime.now() - timedelta(days=7)
+    leaderboard= {}
+    for pair in query_db("SELECT ID1,ID2 FROM friends WHERE accepted = 1 AND (ID1 = ? OR ID2 = ?)",(session["id"],session["id"])):
+        id = pair["ID1"] if pair["ID2"] == session["id"] else pair["ID2"]
+        unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(id,weekago,datetime.now()), one=True)["SUM(length)"]
+        name = query_db("SELECT username FROM users WHERE id = ?", (id,), one=True)["username"]
+        leaderboard[name] = unsafe or 0
+    
+    unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(session["id"],weekago,datetime.now()), one=True)["SUM(length)"]
+    name = query_db("SELECT username FROM users WHERE id = ?", (session["id"],), one=True)["username"]
+    leaderboard[name] = unsafe or 0
+
+    leaderboard = dict(sorted(leaderboard.items(), key= lambda item: item[1], reverse = True))
+    
+    return jsonify(leaderboard)

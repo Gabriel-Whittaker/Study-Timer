@@ -40,6 +40,7 @@ async function getfriends()
 } 
 getfriends();
 
+a = fetch('/weekly_leaderboard');
 
 
 
