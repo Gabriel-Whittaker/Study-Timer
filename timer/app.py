@@ -207,6 +207,6 @@ def weekly_leaderboard():
     name = query_db("SELECT username FROM users WHERE id = ?", (session["id"],), one=True)["username"]
     leaderboard[name] = unsafe or 0
 
-    leaderboard = dict(sorted(leaderboard.items(), key= lambda item: item[1], reverse = True))
+    leaderboard = sorted(leaderboard.items(), key= lambda item: item[1], reverse = True)
     
     return jsonify(leaderboard)

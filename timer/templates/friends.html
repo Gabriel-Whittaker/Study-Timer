@@ -13,23 +13,39 @@
 {% endif %}
 
 
-<ul id="inviteslist">
-    
+
+<div class="d-flex justify-content-between align-items-center">
+<div id = "friendscontainer">
+<ul id="inviteslist" class="list-group">
+    <h2>Invites List</h2>
 
 
 </ul>
 
-<form action="/invite_friend" method="POST">
-    <input type="text" name="username" placeholder="Enter username to invite">
-    <button type="submit" class="btn btn-primary">Invite</button>
-</form>
+
 
 
 
 
 
 <ul id="friendslist">
-
+    <h2>Friends List</h2>
 
 </ul>
+</div>
+
+<form action="/invite_friend" method="POST" id="ïnviteForm">
+    <!-- <input type="text" name="username" placeholder="Enter username to invite">
+    <button type="submit" class="btn btn-primary">Invite</button> -->
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Enter username to invite" aria-label="Recipient's username" name="username" aria-describedby="button-addon2">
+        <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Invite</button>
+    </div>
+</form>
+
+
+<ol id="leaderboard"  class="list-group list-group-numbered">
+    <h2>Weekly Leaderboard</h2>
+</ol>
+</div>
 {% endblock %}

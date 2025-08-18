@@ -26,3 +26,23 @@ body {
     /* vertical */
     min-height: 100vh;
 }
+
+#friendscontainer
+{
+
+    margin: 45px;;
+}
+#ïnviteForm
+{
+    margin: 45px;
+}
+
+#leaderboard
+{
+    margin: 45px;
+}
+
+#button-addon2
+{
+   background-color:  greenyellow;
+}

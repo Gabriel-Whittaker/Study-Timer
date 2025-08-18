@@ -6,6 +6,7 @@ async function getfriendsinvites()
     friends.forEach(function(friend) {
         const li = document.createElement('li');
         li.innerText = friend.username;
+        li.className = "list-group-item d-flex justify-content-between align-items-center"
         const form = document.createElement('form');
         form.action = "/accept_friend";
         form.method = "POST";
@@ -40,8 +41,18 @@ async function getfriends()
 } 
 getfriends();
 
-a = fetch('/weekly_leaderboard');
+async function getleaderboard()
+{
+    let leaderboard = await fetch('/weekly_leaderboard');
+    leaderboard = await leaderboard.json();
+    leaderboard.forEach(function(friend) {
+        const li = document.createElement('li');
+        li.innerText = `${friend[0]} - ${friend[1]} minutes`;
+        li.className = "list-group-item";
+        document.getElementById('leaderboard').appendChild(li);
 
 
-
-})
+    });
+}
+getleaderboard();
+});
