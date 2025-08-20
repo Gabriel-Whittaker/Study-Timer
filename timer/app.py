@@ -210,3 +210,45 @@ def weekly_leaderboard():
     leaderboard = sorted(leaderboard.items(), key= lambda item: item[1], reverse = True)
     
     return jsonify(leaderboard)
+
+
+@app.route("goals")
+def goals():
+    return render_template("goals.html")
+
+@app.route("/create_goal")
+def create_goal():
+    if request.method == "POST":
+        length = request.form.get("length")
+        time = request.form.get("time")
+        title = request.form.get("title")
+        if not length or not time:
+            return render_template("goals.html", error="Length and time cannot be empty.")
+        insert_db("INSERT INTO goals (length, time, title) VALUES (?, ?, ?)", (length, time, title))
+        return render_template("goals.html", success="Created goal.")
+
+@app.route("/invite_goal")
+def invite_goal():
+    id = query_db("SELECT id FROM users WHERE username = ?", (request.form.get("username"),), one=True)
+    if not id:
+        return render_template("goals.html", error="User not found.")
+    insert_db("INSERT INTO goalInvites (id, taskID, accepted) VALUES (?, ?, ?)",(id['id'], request.form.get("taskID"), 0))
+    return render_template("goals.html", success="Invite success.")
+
+@app.route("view_goal_invites")
+def view_goal_invites():
+    ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 0", (session['id'],))
+    goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ?", (i['taskID'],), one= True) for i in ids]
+    return jsonify(goals)
+
+@app.route("/accept_goal_invite", methods=["POST"])
+def accept_goal_invite():
+    insert_db("UPDATE goalsInvites SET accepted = 1 WHERE id = ? AND taskID", (session['id'],request.form.get("taskID")))
+    return render_template("goals.html", sucess= "accepted")
+
+
+@app.route("/view_goals")
+def view_goals():
+    ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 1", (session['id'],))
+    goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ?", (i['taskID'],), one= True) for i in ids]
+    return jsonify(goals)
