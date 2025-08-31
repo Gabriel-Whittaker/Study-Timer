@@ -21,7 +21,9 @@ def insert_db(query, args=()):
     cur = conn.cursor()
     cur.execute(query, args)
     conn.commit()
+    last_id = cur.lastrowid
     conn.close()
+    return last_id
 
 app = Flask(__name__)
 
@@ -87,7 +89,7 @@ def update_timer():
 @app.route("/end_timer")
 def get_timer():
     if session['id']:
-        totaltime = int(session["lastminutes"]) * 60 + int(session["lastseconds"])/60
+        totaltime = round(int(session["lastminutes"]) * 60 + int(session["lastseconds"])/60,2)
         time = datetime.now()
         insert_db("INSERT INTO history (id , timedate, length) VALUES (?, ?, ?)", (session['id'], time, totaltime))
     return jsonify({"status": "success", "minutes": session['lastminutes'] , "seconds": session['lastseconds']})
@@ -201,41 +203,45 @@ def weekly_leaderboard():
         id = pair["ID1"] if pair["ID2"] == session["id"] else pair["ID2"]
         unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(id,weekago,datetime.now()), one=True)["SUM(length)"]
         name = query_db("SELECT username FROM users WHERE id = ?", (id,), one=True)["username"]
-        leaderboard[name] = unsafe or 0
+        temp = unsafe or 0
+        leaderboard[name] = temp/60
     
     unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(session["id"],weekago,datetime.now()), one=True)["SUM(length)"]
     name = query_db("SELECT username FROM users WHERE id = ?", (session["id"],), one=True)["username"]
-    leaderboard[name] = unsafe or 0
+    temp = unsafe or 0
+    leaderboard[name] = temp/60
 
     leaderboard = sorted(leaderboard.items(), key= lambda item: item[1], reverse = True)
     
     return jsonify(leaderboard)
 
 
-@app.route("goals")
+@app.route("/goals")
 def goals():
     return render_template("goals.html")
 
-@app.route("/create_goal")
+@app.route("/create_goal", methods=["GET", "POST"])
 def create_goal():
     if request.method == "POST":
         length = request.form.get("length")
-        time = request.form.get("time")
+        time = request.form.get("expire")
         title = request.form.get("title")
         if not length or not time:
             return render_template("goals.html", error="Length and time cannot be empty.")
-        insert_db("INSERT INTO goals (length, time, title) VALUES (?, ?, ?)", (length, time, title))
-        return render_template("goals.html", success="Created goal.")
+        goalId = insert_db("INSERT INTO goals (length, expire, title, startDate) VALUES (?, ?, ?, ?)", (length, time, title, datetime.now()))
+        insert_db("INSERT INTO goalsInvites (id, taskID, accepted) VALUES (?, ?, ?)",(session['id'], goalId, 1))
+        return redirect("/goals")
 
-@app.route("/invite_goal")
+@app.route("/invite_goal", methods=["GET", "POST"])
 def invite_goal():
-    id = query_db("SELECT id FROM users WHERE username = ?", (request.form.get("username"),), one=True)
-    if not id:
-        return render_template("goals.html", error="User not found.")
-    insert_db("INSERT INTO goalInvites (id, taskID, accepted) VALUES (?, ?, ?)",(id['id'], request.form.get("taskID"), 0))
+    # id = query_db("SELECT id FROM users WHERE username = ?", (request.form.get("username"),), one=True)
+    # if not id:
+    #     return render_template("goals.html", error="User not found.")
+    id = request.form.get("id")
+    insert_db("INSERT INTO goalsInvites (id, taskID, accepted) VALUES (?, ?, ?)",(int(id), request.form.get("taskID"), 0))
     return render_template("goals.html", success="Invite success.")
 
-@app.route("view_goal_invites")
+@app.route("/view_goal_invites", methods=["GET", "POST"])
 def view_goal_invites():
     ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 0", (session['id'],))
     goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ?", (i['taskID'],), one= True) for i in ids]
@@ -243,12 +249,29 @@ def view_goal_invites():
 
 @app.route("/accept_goal_invite", methods=["POST"])
 def accept_goal_invite():
-    insert_db("UPDATE goalsInvites SET accepted = 1 WHERE id = ? AND taskID", (session['id'],request.form.get("taskID")))
+    insert_db("UPDATE goalsInvites SET accepted = 1 WHERE id = ? AND taskID = ?", (session['id'],request.form.get("taskID")))
     return render_template("goals.html", sucess= "accepted")
 
 
-@app.route("/view_goals")
+@app.route("/view_goals", methods=["GET", "POST"])
 def view_goals():
     ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 1", (session['id'],))
     goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ?", (i['taskID'],), one= True) for i in ids]
     return jsonify(goals)
+
+@app.route("/get_progress", methods=["GET", "POST"])
+def get_progress():
+    taskID = request.args.get('taskID')
+
+    goal = query_db("SELECT id,startDate,expire FROM goals WHERE id = ?", (taskID,), one=True)
+    print(goal)
+    ids = query_db("SELECT id FROM goalsInvites WHERE taskID = ? AND accepted = 1", (taskID,))
+    progress = {}
+    for i in ids:
+        unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(i["id"],goal["startDate"],goal["expire"]), one=True)["SUM(length)"]
+        name = query_db("SELECT username FROM users WHERE id = ?", (i["id"],), one=True)["username"]
+        progress[name] =unsafe or 0
+        progress[name] = round(progress[name]/60,2)
+
+    
+    return jsonify(list(progress.items()))
