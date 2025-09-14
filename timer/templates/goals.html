@@ -5,22 +5,27 @@
 
 <div class="d-flex justify-content-between align-items-center">
     <div id="goalscontainer">
-        <ul id="inviteslist" class="list-group">
-            <h2>Invites List</h2>
+        <h3>Invites</h3>
+        <div class="container my-4">
+            
+            <div class="d-flex overflow-auto" style="gap: 1rem; padding-bottom: 1rem;" id="inviteslist">
+        
+            </div>
+        </div>
 
 
-        </ul>
 
 
 
 
+        <h3>Goals</h3>
+        <div class="container my-4">
+            
+            <div class="d-flex overflow-auto" style="gap: 1rem; padding-bottom: 1rem;" id="goalslist">
+                
+            </div>
+        </div>
 
-
-
-        <ul id="goalslist">
-            <h2>Goals List</h2>
-
-        </ul>
         <div>
             <form method="POST" action = "/create_goal" id = "createGoalForm">
                 <input type="text" name="title" placeholder="title" required>
