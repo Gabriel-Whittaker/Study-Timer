@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    async function displayGoal (goal, element) {
+    async function displayGoal (goal, element, show=true) {
         console.log(goal.id);
         let progess = await fetch(`/get_progress?taskID=${goal.id}`);
         progess = await progess.json();
@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
         expire.innerText = `Study ${goal.length} minutes by ${new Date(goal.expire).toLocaleDateString()}`;
         expire.className = "card-subtitle mb-2 text-body-secondary";
         element.appendChild(expire);
+        if (show){
         progess.forEach(function (user) {
             
             const progressBar = document.createElement('div');
@@ -23,22 +24,46 @@ document.addEventListener('DOMContentLoaded', function () {
             if (time > 100) {
                 progress.className = "progress-bar bg-success";
                 progress.style.width = "100%";
+                const name = document.createElement("h6")
+                name.innerText = `${user[0]} completed the goal! :)`;
+                name.className = "card-text";
+                element.appendChild(name);
             }
             if (new Date(goal.expire).getTime() < Date.now() ) {
               
                 if (time < 100){
                     progress.className = "progress-bar bg-danger";
-                    element.appendChild(document.createElement("h6")).innerText = `${user[0]} failed :(`;
+                    const name = document.createElement("h6")
+                    name.innerText = `${user[0]} failed :(`;
+                    name.className = "card-text";
+                    element.appendChild(name);
                 }
                 
             }
             else
                 {
-            element.appendChild(document.createElement("h6")).innerText = `${user[0]}`;
+            const name = document.createElement("h6")
+            name.innerText = `${user[0]}`;
+            name.className = "card-text";
+            element.appendChild(name);
         }
             progressBar.appendChild(progress);
             element.appendChild(progressBar);
-        });
+        });}
+        else
+            {
+                const users  = element.appendChild(document.createElement("h6"));
+                users.innerText = "Join  ";
+                let x = 0;
+                progess.forEach(function (user)
+                {
+                    if (x > 0)
+                        {
+                            users.innerText += ",";
+                        }
+                    users.innerText += ` ${user[0]}`;
+                });
+            }
     }
    
    
@@ -48,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         goals.forEach(async function(goal) 
         {
             const card = document.createElement('div');
-            card.className = "card";
+            card.className = "card flex-shrink-0";
             card.style = "width: 18rem;";
 
             const cardbody = document.createElement('div');
@@ -72,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const button = document.createElement('button');
             button.type = 'submit';
             button.innerText = 'Invite Friend';
+            button.className = 'invitebtn'
             const input = document.createElement('input');
             input.type = 'hidden';
             input.value = `${goal.id}`;
@@ -94,12 +120,12 @@ document.addEventListener('DOMContentLoaded', function () {
         goals.forEach(async function(goal)
             {
             const card = document.createElement('div');
-            card.className = "card";
+            card.className = "card flex-shrink-0";
             card.style = "width: 18rem;";
 
             const cardbody = document.createElement('div');
             cardbody.className = "card-body";
-            displayGoal(goal, cardbody);
+            displayGoal(goal, cardbody, false);
             const form = document.createElement('form');
             form.action = "/accept_goal_invite";
             form.method = "POST";
@@ -114,7 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
             form.appendChild(button);
             cardbody.appendChild(form);
             card.appendChild(cardbody);
-
+            
+            
             document.getElementById('inviteslist').appendChild(card);
 
         });

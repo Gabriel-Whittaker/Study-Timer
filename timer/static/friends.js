@@ -35,6 +35,7 @@ async function getfriends()
     friends.forEach(function(friend) {
         const li = document.createElement('li');
         li.innerText = friend.username;
+        li.className = "list-group-item";
         document.getElementById('friendslist').appendChild(li);
 
     }); // Close forEach callback

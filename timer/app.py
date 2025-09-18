@@ -250,7 +250,7 @@ def view_goal_invites():
 @app.route("/accept_goal_invite", methods=["POST"])
 def accept_goal_invite():
     insert_db("UPDATE goalsInvites SET accepted = 1 WHERE id = ? AND taskID = ?", (session['id'],request.form.get("taskID")))
-    return render_template("goals.html", sucess= "accepted")
+    return redirect("/goals")
 
 
 @app.route("/view_goals", methods=["GET", "POST"])

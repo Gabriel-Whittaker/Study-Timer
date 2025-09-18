@@ -2,7 +2,7 @@
 {
     margin: 5px;
     font-size: 120px;
-    color : white;
+    color : #f4e8c1;
     /* padding: 10px; */
 }
 #dropdown
@@ -15,7 +15,9 @@
     /* background-color: darkolivegreen; */
 body
 {
-    background-color: cornflowerblue;
+    /* background-color: #91C8E4; */
+    background-color: #274c77;
+    
 }
 
 body {
@@ -45,4 +47,90 @@ body {
 #button-addon2
 {
    background-color:  greenyellow;
+}
+
+h2
+{
+    color: #f4e8c1;
+    padding: 10px;
+}
+
+h3
+{
+    color: #f4e8c1;
+   
+}
+h5
+{
+    color: #f4e8c1;
+   
+}
+h6
+{
+    color: #f4e8c1;
+   
+}
+form
+{
+
+    padding:5px;
+}
+
+:root {
+     --bs-body-bg: #f4e8c1; 
+}
+
+li
+{
+    color: #331e38;
+}
+
+input{
+    background-color: #f4e8c1;
+}
+
+.card {
+    background-color: #6096BA;
+    
+}
+.card-title{
+    color: #f4e8c1;
+}
+.card-text{
+    color: #f4e8c1;
+}
+.card-subtitle{
+    color: #f4e8c1;
+}
+
+.invitebtn{
+    background-color: #f4e8c1;
+    margin: 5px;
+    
+}
+.navbar{
+    background-color: #f4e8c1 !important;
+}
+
+.progress
+{
+    background-color: #f4e8c1;
+ 
+}
+
+.progress-bar
+{
+    background-color: #274c77;
+}
+
+option
+{
+    background-color: #f4e8c1;
+    
+    
+}
+select
+{
+    background-color: #f4e8c1;
+  
 }

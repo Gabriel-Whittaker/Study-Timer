@@ -2,12 +2,12 @@
 
 {% block content %}
 
+<script src="/static/stats.js"></script>
 
-
-  <h2 style="text-align: center; color: white;">Stats</h2>
+  <h2 style="text-align: center;">Stats</h2>
 
 <!-- <div class = "d-flex justify-content-center"> -->
-<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" >
+<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" style="background-color: #6096BA; border-radius: 10%; padding: 25px; width: 700px; height: 500px;">
   <div class="carousel-indicators">
     <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
     <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -20,16 +20,16 @@
     </div>
       <div class="carousel-caption d-none d-md-block">
         <h5>Distrubtion of study time</h5>
-        <p>% of total time studying each hour of the day</p>
+        <h6>% of total time studying each hour of the day</h6>
       </div>
     </div>
     <div class="carousel-item">
     <div style="width: 700px; height: 500px;">
-        <canvas id="monthchart"></canvas>
+        <canvas id="monthchart" ></canvas>
     </div>
       <div class="carousel-caption d-none d-md-block">
         <h5>Monthly breakdown</h5>
-        <p>Time studied each day </p>
+        <h6>Time studied each day </h6>
       </div>
     </div>
     <div class="carousel-item">
@@ -38,7 +38,7 @@
     </div>
       <div class="carousel-caption d-none d-md-block">
         <h5>Yearly breakdown</h5>
-        <p>Time studied each month</p>
+        <h6>Time studied each month</h6>
       </div>
     </div>
   </div>
@@ -53,8 +53,8 @@
 </div>
 </div>
 
-<h3 style="text-align: center; color: white;">Total: {{total}} minutes</h3>
-<h3 style="text-align: center; color: white;">Average: {{average}} minutes</h3>
+<h3 style="text-align: center; margin: 10px; margin-top: 20px;">Total: {{total}} minutes</h3>
+<h3 style="text-align: center; ">Average Session: {{average}} minutes</h3>
 
 
 
@@ -70,36 +70,6 @@
 
 <script>
 
-    async function fetchData(id, name, args, units) {
-        const ctx = document.getElementById(id);
-        let data = await (fetch(`/${name}?${args}`));
-        data = await data.json();
-        console.log(data);
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels,
-                datasets:// data.dataset
-                    [{
-                        label: `${units} Studied`,
-                        data: data.dataset,
-                        borderWidth: 1
-                    }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-    Chart.defaults.backgroundColor = '#94D0F5';
-    Chart.defaults.borderColor = '#367fEB';
-    Chart.defaults.color = '#FFFFFF';
-    fetchData("hourlychart","hourly_data", null, "Percentage");
-    fetchData("monthchart", "month_data", "month=8", "Minutes");
-    fetchData("yearchart", "year_data", "year=2025", "Minutes");
+   
 </script>
 {% endblock %}
