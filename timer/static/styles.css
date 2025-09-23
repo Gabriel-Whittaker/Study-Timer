@@ -80,10 +80,7 @@ form
      --bs-body-bg: #f4e8c1; 
 }
 
-li
-{
-    color: #331e38;
-}
+
 
 input{
     background-color: #f4e8c1;
@@ -133,4 +130,21 @@ select
 {
     background-color: #f4e8c1;
   
+}
+
+.butoff
+{
+    background-color: #f4e8c1;
+}
+
+.greytext
+{
+    color: rgb(77, 86, 94);
+}
+
+
+li {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgb(77, 86, 94);
 }

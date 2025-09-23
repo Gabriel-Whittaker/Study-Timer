@@ -21,7 +21,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     y: {
                         beginAtZero: true
                     }
+                    
+                },
+                layout: {
+                    padding:{
+                        right: 50,
+                    } 
                 }
+                
             }
         });
     }

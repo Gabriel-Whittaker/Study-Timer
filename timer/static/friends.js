@@ -17,7 +17,8 @@ async function getfriendsinvites()
         form.appendChild(input);
         const button = document.createElement('button');
         button.type ='submit';
-        button.innerText = 'Submit';
+        button.className = 'butoff'
+        button.innerText = 'Accept';
         form.appendChild(button);
         li.appendChild(form);
 

@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             users.innerText += ",";
                         }
                     users.innerText += ` ${user[0]}`;
+                    x += 1;
                 });
             }
     }
@@ -136,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
             form.appendChild(input);
             const button = document.createElement('button');
             button.type = 'submit';
+            button.className = 'butoff'
             button.innerText = 'Accept Invite';
             form.appendChild(button);
             cardbody.appendChild(form);
