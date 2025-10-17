@@ -31,6 +31,8 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
+
 @app.route("/")
 def index():
     return render_template("index.html") 
@@ -77,6 +79,23 @@ def login():
         return redirect("/")
     else:
         return render_template("login.html")
+
+@app.route("/update_current_timer")
+def update_current_timer():
+    print("updating")
+    minutes = request.args.get('minutes')
+    seconds = request.args.get('seconds')
+    session['currentminutes'] = minutes
+    session['currentseconds'] = seconds
+    return {"status": "success"}
+
+@app.route("/get_current_timer")
+def get_current_timer():
+    if session.get('currentminutes') is not None:
+        print(session['currentminutes'])
+        return jsonify({"status":1, "minutes": session['currentminutes'] , "seconds": session['currentseconds']})
+    else:
+        return jsonify({"status":0})    
 
 @app.route("/update_timer")
 def update_timer():
@@ -204,12 +223,12 @@ def weekly_leaderboard():
         unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(id,weekago,datetime.now()), one=True)["SUM(length)"]
         name = query_db("SELECT username FROM users WHERE id = ?", (id,), one=True)["username"]
         temp = unsafe or 0
-        leaderboard[name] = temp/60
+        leaderboard[name] = round(temp/60)
     
     unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(session["id"],weekago,datetime.now()), one=True)["SUM(length)"]
     name = query_db("SELECT username FROM users WHERE id = ?", (session["id"],), one=True)["username"]
     temp = unsafe or 0
-    leaderboard[name] = temp/60
+    leaderboard[name] = round(temp/60)
 
     leaderboard = sorted(leaderboard.items(), key= lambda item: item[1], reverse = True)
     
