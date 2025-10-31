@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
       //pause
           {
             active = 2;
-            start.innerText = "Start Timer";
+              start.innerHTML = '<img src="/static/play.png" alt="Start" width="30" height="30">';
             clearInterval(time);
           }
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     else
       {
         active = 1;
-        start.innerText = "Stop Timer";
+        start.innerHTML = '<img src="/static/pause.png" alt="Stop" width="30" height="30">';
         time = setInterval(function(){
             totalSeconds--;
             minutes = Math.floor(totalSeconds / 60);

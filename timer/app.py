@@ -137,19 +137,19 @@ def stats():
     data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
     total = sum(i['length'] for i in data)
     average = total / len(data) if data else 0
-    total = round(total)
-    average = round(average)
+    total = round(total/60)
+    average = round(average/60)
     return render_template("stats.html", total=total , average=average)
 
 
 @app.route("/month_data", methods=["GET"])
 def month_data():
-    month = request.args.get('month')
+    month = datetime.now().month
     data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
     month_data = [0] * monthrange(datetime.now().year, int(month))[1]  # Days in the month
     for i in data:
         if int(i['timedate'].split("-")[1][:2]) == int(month):
-            month_data[int(i['timedate'].split("-")[2][:2])-1] += round(i['length'])
+            month_data[int(i['timedate'].split("-")[2][:2])-1] += round(i['length'])/60
         
     labels = [f"{month}/{i}" for i in range(1, len(month_data)+1)]
     
@@ -157,12 +157,12 @@ def month_data():
 
 @app.route("/year_data", methods=["GET"])
 def year_data():
-    year = request.args.get('year')
+    year = datetime.now().year
     data = query_db("SELECT length, timedate FROM history WHERE id = ?", (session['id'],))
     year_data = [0] * 12
     for i in data:
         if int(i['timedate'].split("-")[0]) == int(year):
-          year_data[int(i['timedate'].split("-")[1][:2])-1] += round(i['length'])
+          year_data[int(i['timedate'].split("-")[1][:2])-1] += round(i['length'])/60
         
     labels = [month_name[i] for i in range(1,13)]
     
