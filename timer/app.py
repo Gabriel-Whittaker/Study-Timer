@@ -1,5 +1,5 @@
 import os
-print("PROCESS PID:", os.getpid())
+
 from flask import Flask, render_template, session, request, jsonify, redirect
 from flask_session import Session
 import sqlite3
@@ -39,13 +39,7 @@ app.config["SESSION_REFRESH_EACH_REQUEST"] = False
 app.config['SESSION_COOKIE_PATH'] = '/'
 Session(app)
 
-@app.before_request
-def debug_session_before():
-    print("BEFORE:", request.path, dict(session))
-@app.after_request
-def debug_session_after(response):
-    print("AFTER:", request.path, dict(session))
-    return response
+
 
 
 @app.route("/")
@@ -99,7 +93,7 @@ def login():
 
 @app.route("/update_current_timer")
 def update_current_timer():
-    print("refreshing")
+
     minutes = request.args.get('minutes')
     seconds = request.args.get('seconds')
     session['currentminutes'] = int(minutes)
@@ -109,27 +103,26 @@ def update_current_timer():
 @app.route("/get_current_timer")
 def get_current_timer():
     if session.get('currentminutes') is not None:
-        print('sending over',session['currentminutes'])
+
         return jsonify({"status":1, "minutes": session['currentminutes'] , "seconds": session['currentseconds']})
     else:
         return jsonify({"status":0})    
 
 @app.route("/update_timer")
 def update_timer():
-    print("UPDATE_TIMER CALL start:", dict(session))
+
     minutes = request.args.get('minutes')
     seconds = request.args.get('seconds')
     session['lastminutes'] = int(minutes)
     session['lastseconds'] = int(seconds)
     
-    print("UPDATE_TIMER CALL: end", dict(session))
+
     return {"status": "success"}
 
 @app.route("/end_timer")
 def get_timer():
     if session['id']:
-        print("UPDATE_CURRENT CALL:", dict(session))
-        print('ending',session.get('lastminutes'))
+
         totaltime = round(int(session["lastminutes"]) * 60 + int(session["lastseconds"])/60,2)
         time = datetime.now()
         insert_db("INSERT INTO history (id , timedate, length) VALUES (?, ?, ?)", (session['id'], time, totaltime))
@@ -307,7 +300,7 @@ def get_progress():
     taskID = request.args.get('taskID')
 
     goal = query_db("SELECT id,startDate,expire FROM goals WHERE id = ?", (taskID,), one=True)
-    print(goal)
+
     ids = query_db("SELECT id FROM goalsInvites WHERE taskID = ? AND accepted = 1", (taskID,))
     progress = {}
     for i in ids:
