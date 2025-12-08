@@ -112,12 +112,14 @@ input{
 .progress
 {
     background-color: #f4e8c1;
+    margin: 3px;
  
 }
 
 .progress-bar
 {
     background-color: #274c77;
+    
 }
 
 option
@@ -147,4 +149,9 @@ li {
     font-size: 1rem;
     font-weight: 600;
     color: rgb(77, 86, 94);
+}
+
+.error
+{
+    color: #f4e8c1;
 }

@@ -4,13 +4,7 @@
 
 <script src="/static/friends.js"></script>
 
-{% if error%}
-{{ error }}
-{% endif %}
 
-{% if success %}
-{{ success }}
-{% endif %}
 
 
 
@@ -36,6 +30,14 @@
 <ol id="leaderboard" class="list-group list-group-numbered"  style="background-color: #6096BA;">
     <h2>Weekly Leaderboard</h2>
 </ol>
+<div>
+{% if error%}
+<h5>{{ error }}</h5>
+{% endif %}
+
+{% if success %}
+<h5>{{ success }}</h5>
+{% endif %}
 <form action="/invite_friend" method="POST" id="inviteForm">
     <!-- <input type="text" name="username" placeholder="Enter username to invite">
     <button type="submit" class="btn btn-primary">Invite</button> -->
@@ -44,7 +46,7 @@
         <button class="btn btn-outline-secondary" type="submit" id="button-addon2" style="background-color: #6096BA;">Invite</button>
     </div>
 </form>
-
+</div>
 
 
 </div>

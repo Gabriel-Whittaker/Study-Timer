@@ -1,3 +1,5 @@
+import os
+print("PROCESS PID:", os.getpid())
 from flask import Flask, render_template, session, request, jsonify, redirect
 from flask_session import Session
 import sqlite3
@@ -26,11 +28,24 @@ def insert_db(query, args=()):
     return last_id
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "ugouygnfbytdopuhuyd5wsreyrtciygy"
+
+
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_REFRESH_EACH_REQUEST"] = False
+
+app.config['SESSION_COOKIE_PATH'] = '/'
 Session(app)
 
+@app.before_request
+def debug_session_before():
+    print("BEFORE:", request.path, dict(session))
+@app.after_request
+def debug_session_after(response):
+    print("AFTER:", request.path, dict(session))
+    return response
 
 
 @app.route("/")
@@ -76,38 +91,45 @@ def login():
         if not check_password_hash(user['hash'], password):
             return render_template("login.html", error="Incorrect password.")
         session['id'] = user['id']
+        session['lastminutes'] = 10
+        session['lastseconds'] = 0
         return redirect("/")
     else:
         return render_template("login.html")
 
 @app.route("/update_current_timer")
 def update_current_timer():
-    print("updating")
+    print("refreshing")
     minutes = request.args.get('minutes')
     seconds = request.args.get('seconds')
-    session['currentminutes'] = minutes
-    session['currentseconds'] = seconds
+    session['currentminutes'] = int(minutes)
+    session['currentseconds'] = int(seconds)
     return {"status": "success"}
 
 @app.route("/get_current_timer")
 def get_current_timer():
     if session.get('currentminutes') is not None:
-        print(session['currentminutes'])
+        print('sending over',session['currentminutes'])
         return jsonify({"status":1, "minutes": session['currentminutes'] , "seconds": session['currentseconds']})
     else:
         return jsonify({"status":0})    
 
 @app.route("/update_timer")
 def update_timer():
+    print("UPDATE_TIMER CALL start:", dict(session))
     minutes = request.args.get('minutes')
     seconds = request.args.get('seconds')
-    session['lastminutes'] = minutes
-    session['lastseconds'] = seconds
+    session['lastminutes'] = int(minutes)
+    session['lastseconds'] = int(seconds)
+    
+    print("UPDATE_TIMER CALL: end", dict(session))
     return {"status": "success"}
 
 @app.route("/end_timer")
 def get_timer():
     if session['id']:
+        print("UPDATE_CURRENT CALL:", dict(session))
+        print('ending',session.get('lastminutes'))
         totaltime = round(int(session["lastminutes"]) * 60 + int(session["lastseconds"])/60,2)
         time = datetime.now()
         insert_db("INSERT INTO history (id , timedate, length) VALUES (?, ?, ?)", (session['id'], time, totaltime))
@@ -257,6 +279,8 @@ def invite_goal():
     # if not id:
     #     return render_template("goals.html", error="User not found.")
     id = request.form.get("id")
+    if query_db("SELECT * FROM goalsInvites WHERE id = ? AND taskID = ?",(int(id), request.form.get("taskID"))):
+        return redirect("/goals")
     insert_db("INSERT INTO goalsInvites (id, taskID, accepted) VALUES (?, ?, ?)",(int(id), request.form.get("taskID"), 0))
     return redirect("/goals")
 

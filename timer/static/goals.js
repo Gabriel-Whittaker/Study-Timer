@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
         element.appendChild(expire);
         if (show){
         progess.forEach(function (user) {
-            
+            let customText = "";
             const progressBar = document.createElement('div');
             progressBar.className = "progress";
             progressBar.role = "progressbar";
@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const name = document.createElement("h6")
                 name.innerText = `${user[0]} completed the goal! :)`;
                 name.className = "card-text";
-                element.appendChild(name);
+                customText = name
+                
             }
             if (new Date(goal.expire).getTime() < Date.now() ) {
               
@@ -36,7 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     const name = document.createElement("h6")
                     name.innerText = `${user[0]} failed :(`;
                     name.className = "card-text";
-                    element.appendChild(name);
+                    customText = name
+                    
                 }
                 
             }
@@ -49,6 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
             progressBar.appendChild(progress);
             element.appendChild(progressBar);
+            if (customText != "")
+                {element.appendChild(customText)}
         });}
         else
             {

@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if ( totalSeconds <= 0) 
               { 
                   clearInterval(time);
-                  start.innerText = "Start Timer";
+                  start.innerHTML = '<img src="/static/play.png" alt="Start" width="30" height="30">';
                   async function fetchPrevious() 
                 {
                   const prev = await(fetch(`/end_timer`));
