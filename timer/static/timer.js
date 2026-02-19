@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   let start = document.getElementById('start');
-  console.log(start);
+  //console.log(start);
   start.addEventListener('click', function() {
     if (active == 0)
       {
