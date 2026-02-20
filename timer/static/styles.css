@@ -155,3 +155,9 @@ li {
 {
     color: #f4e8c1;
 }
+
+
+input[type='checkbox']
+{
+    margin: 5px;
+}

@@ -128,6 +128,17 @@ def get_timer():
         insert_db("INSERT INTO history (id , timedate, length) VALUES (?, ?, ?)", (session['id'], time, totaltime))
     return jsonify({"status": "success", "minutes": session['lastminutes'] , "seconds": session['lastseconds']})
 
+
+@app.route("/goalProgress", methods=["POST"])
+def goalProgress():
+    data = request.get_json()
+    lastSession = query_db("SELECT studyID FROM history ORDER BY studyID DESC LIMIT 1", one=True)
+    
+    for goalID in data:
+        insert_db("INSERT INTO activeGoals (studyID, goalID) VALUES (?, ?)", (lastSession['studyID'],int(goalID)))
+    return 'ok'
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -304,7 +315,7 @@ def get_progress():
     ids = query_db("SELECT id FROM goalsInvites WHERE taskID = ? AND accepted = 1", (taskID,))
     progress = {}
     for i in ids:
-        unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ?",(i["id"],goal["startDate"],goal["expire"]), one=True)["SUM(length)"]
+        unsafe = query_db("SELECT SUM(length) FROM history WHERE id = ? AND timedate BETWEEN ? AND ? AND studyID IN (SELECT studyID from activeGoals WHERE goalID = ?)",(i["id"],goal["startDate"],goal["expire"], taskID), one=True)["SUM(length)"]
         name = query_db("SELECT username FROM users WHERE id = ?", (i["id"],), one=True)["username"]
         progress[name] =unsafe or 0
         progress[name] = round(progress[name]/60,2)

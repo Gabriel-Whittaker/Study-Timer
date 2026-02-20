@@ -57,6 +57,52 @@ document.addEventListener('DOMContentLoaded', function() {
     // document.getElementById('timer').innerText = `Timer: ${minutes}:${seconds}`;
   });
 
+
+  async function getGoals()
+  {
+    let goals = await fetch('/view_goals');
+    goals = await goals.json();
+    let activeGoals = document.getElementById('activeGoals')
+    goals.forEach(async function(goal)
+    {
+      
+      const goalElement = document.createElement('li');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = goal.id;
+      //checkbox.checked = 'bool'
+      const label = document.createElement('label');
+      label.for = goal.id;
+      label.innerText = goal.title;
+      goalElement.appendChild(checkbox);
+      goalElement.appendChild(label);
+      activeGoals.appendChild(goalElement);
+
+    })
+  }
+  async function sendGoals()
+  {
+    let activeGoals = document.getElementById('activeGoals')
+    const goals = []
+    Array.from(activeGoals.children).forEach(async function (goal) 
+    {
+      if (goal.children[0].checked)
+        {
+          goals.push(goal.children[0].id);
+        }
+        
+    }
+    
+  );
+    fetch("/goalProgress",{
+      method: 'Post', 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(goals)
+    }
+    );
+  }
+  getGoals()
+
   let start = document.getElementById('start');
   //console.log(start);
   start.addEventListener('click', function() {
@@ -90,9 +136,10 @@ document.addEventListener('DOMContentLoaded', function() {
                   start.innerHTML = '<img src="/static/play.png" alt="Start" width="30" height="30">';
                   async function fetchPrevious() 
                 {
+                  
                   const prev = await(fetch(`/end_timer`));
                   const data = await prev.json();
-               
+                  sendGoals();
                   minutes = parseInt(data.minutes);
                   seconds = parseInt(data.seconds);
                   totalSeconds = (minutes * 60) + seconds;
