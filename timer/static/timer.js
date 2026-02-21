@@ -101,7 +101,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     );
   }
-  getGoals()
+ 
+
+  async function getActiveGoals()
+  {
+    const goals = await fetch("/sendActiveGoals", {
+      method: 'Post'  });
+    const activeGoals = await goals.json();
+ 
+    if (activeGoals.Status == 200)
+      {
+        
+        let currentGoals = document.getElementById('activeGoals');
+   
+       Array.from(currentGoals.children).forEach(function (goal) 
+        {
+        
+         if (activeGoals.activeGoals.includes(parseInt(goal.children[0].id)))
+            {
+              
+              goal.children[0].checked = 'True';
+            }
+
+        });
+
+      
+      }
+
+  }
+
+
+  
+  
+  async function goals()
+  {
+    await getGoals();
+    await getActiveGoals();
+  }
+  goals()
 
   let start = document.getElementById('start');
   //console.log(start);
@@ -163,7 +200,26 @@ window.addEventListener('pagehide', function () {
   
  
   fetch(`/update_current_timer?minutes=${parseInt(minutes)}&seconds=${parseInt(seconds) }`);
-  
+  async function updateActiveGoals() {
+    let activeGoals = document.getElementById('activeGoals')
+    const goals = []
+    Array.from(activeGoals.children).forEach(async function (goal) {
+      if (goal.children[0].checked) {
+        goals.push(goal.children[0].id);
+      }
+
+    }
+
+    );
+    fetch("/updateActiveGoals", {
+      method: 'Post',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(goals)
+    }
+    );
+
+  }
+  updateActiveGoals()
 
 
 });

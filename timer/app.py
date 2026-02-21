@@ -131,12 +131,34 @@ def get_timer():
 
 @app.route("/goalProgress", methods=["POST"])
 def goalProgress():
-    data = request.get_json()
-    lastSession = query_db("SELECT studyID FROM history ORDER BY studyID DESC LIMIT 1", one=True)
-    
-    for goalID in data:
-        insert_db("INSERT INTO activeGoals (studyID, goalID) VALUES (?, ?)", (lastSession['studyID'],int(goalID)))
+    if session['id']:
+        data = request.get_json()
+        lastSession = query_db("SELECT studyID FROM history ORDER BY studyID DESC LIMIT 1", one=True)
+        
+        for goalID in data:
+            insert_db("INSERT INTO activeGoals (studyID, goalID) VALUES (?, ?)", (lastSession['studyID'],int(goalID)))
     return 'ok'
+
+@app.route("/updateActiveGoals", methods=["POST"])
+def updateActiveGoals():
+     if session['id']:
+       
+        data = request.get_json()
+        session['activeGoals'] = list(map(int, data))
+     return 'ok'
+
+@app.route("/sendActiveGoals", methods=["POST"])
+def sendActiveGoals():
+    if session['id']:
+        if session.get('activeGoals'):
+            
+            return  jsonify({'Status':200,'activeGoals':session['activeGoals']})
+        else:
+            lastSession = query_db("SELECT studyID FROM history ORDER BY studyID DESC LIMIT 1", one=True)['studyID']
+            activeGoals = query_db("SELECT goalID FROM activeGoals WHERE studyID = ?", (lastSession,))
+            return jsonify({'Status':200,'activeGoals':[i['goalID'] for i in activeGoals]})
+
+    return jsonify({'Status':0})
 
 
 @app.route("/logout")
