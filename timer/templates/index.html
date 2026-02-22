@@ -3,18 +3,20 @@
 {% block content %}
 
     <script src="/static/timer.js"></script>
-    <div class="position-absolute top-0 start-0 ">
-        <div class="btn-group dropend" id="dropdown">
-             <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
-                 style="background-color: #6096BA;">
-                 <h5 id="activeGoalNumber">Select active goals</h5>
-            </button>
-          <ul class="dropdown-menu" id="activeGoals" aria-labelledby="dropdownMenuButton1">
-           
-    
-         </ul>
-        </div>
+<div class="position-absolute top-0 start-0 ">
+    <div class="btn-group dropend" id="dropdown">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+            style="background-color: #6096BA;">
+            <span style="color:#f4e8c1; " class="fs-5">
+                Select active goals
+            </span>
+        </button>
+        <ul class="dropdown-menu" id="activeGoals" aria-labelledby="dropdownMenuButton1">
+
+
+        </ul>
     </div>
+</div>
     <div class="position-absolute top-50 start-50 translate-middle" id="timercontainer">
         
         <div class="d-flex align-items-start ">

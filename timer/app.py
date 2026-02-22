@@ -324,9 +324,10 @@ def accept_goal_invite():
 
 @app.route("/view_goals", methods=["GET", "POST"])
 def view_goals():
-    ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 1", (session['id'],))
-    goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ? AND expire > ?", (i['taskID'], datetime.now() - timedelta(days=5)), one= True) for i in ids]
-    return jsonify(goals)
+    if session['id']:
+        ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 1", (session['id'],))
+        goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ? AND expire > ?", (i['taskID'], datetime.now() - timedelta(days=5)), one= True) for i in ids]
+        return jsonify(goals)
 
 @app.route("/get_progress", methods=["GET", "POST"])
 def get_progress():
