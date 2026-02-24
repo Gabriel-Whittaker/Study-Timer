@@ -28,7 +28,7 @@ def insert_db(query, args=()):
     return last_id
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "ugouygnfbytdopuhuyd5wsreyrtciygy"
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 
 
