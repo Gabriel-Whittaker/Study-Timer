@@ -121,7 +121,7 @@ def update_timer():
 
 @app.route("/end_timer")
 def get_timer():
-    if session['id']:
+    if session.get('id'):
 
         totaltime = round(int(session["lastminutes"]) * 60 + int(session["lastseconds"])/60,2)
         time = datetime.now()
@@ -131,7 +131,7 @@ def get_timer():
 
 @app.route("/goalProgress", methods=["POST"])
 def goalProgress():
-    if session['id']:
+    if session.get('id'):
         data = request.get_json()
         lastSession = query_db("SELECT studyID FROM history ORDER BY studyID DESC LIMIT 1", one=True)
         
@@ -141,7 +141,7 @@ def goalProgress():
 
 @app.route("/updateActiveGoals", methods=["POST"])
 def updateActiveGoals():
-     if session['id']:
+     if session.get('id'):
        
         data = request.get_json()
         session['activeGoals'] = list(map(int, data))
@@ -149,7 +149,7 @@ def updateActiveGoals():
 
 @app.route("/sendActiveGoals", methods=["POST"])
 def sendActiveGoals():
-    if session['id']:
+    if session.get('id'):
         if session.get('activeGoals'):
             
             return  jsonify({'Status':200,'activeGoals':session['activeGoals']})
@@ -324,10 +324,11 @@ def accept_goal_invite():
 
 @app.route("/view_goals", methods=["GET", "POST"])
 def view_goals():
-    if session['id']:
+    if session.get('id'):
         ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 1", (session['id'],))
         goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ? AND expire > ?", (i['taskID'], datetime.now() - timedelta(days=5)), one= True) for i in ids]
         return jsonify(goals)
+    return 'ok'
 
 @app.route("/get_progress", methods=["GET", "POST"])
 def get_progress():
