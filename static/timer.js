@@ -142,10 +142,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let start = document.getElementById('start');
   //console.log(start);
+  let startTime;
+  let intialLength;
+
   start.addEventListener('click', function() {
+    
     if (active == 0)
       {
         fetch(`/update_timer?minutes=${minutes}&seconds=${seconds}`);
+      
         //start for for fisrt time
       }
     if (active == 1)
@@ -154,15 +159,18 @@ document.addEventListener('DOMContentLoaded', function() {
             active = 2;
               start.innerHTML = '<img src="/static/play.png" alt="Start" width="30" height="30">';
             clearInterval(time);
+            
           }
 
     
     else
       {
+        startTime = Date.now();
+        intialLength = (minutes * 60) + seconds;
         active = 1;
         start.innerHTML = '<img src="/static/pause.png" alt="Stop" width="30" height="30">';
         time = setInterval(function(){
-            totalSeconds--;
+            totalSeconds = intialLength + Math.round((startTime - Date.now())/1000);
             minutes = Math.floor(totalSeconds / 60);
             seconds = totalSeconds % 60;
  
