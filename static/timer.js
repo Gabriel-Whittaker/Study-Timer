@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let goals = await fetch('/view_goals');
     goals = await goals.json();
     let activeGoals = document.getElementById('activeGoals')
+    
+    if (goals.length === 0){
+      activeGoals.innerText = 'No current goals, make one in the goals tab';
+      activeGoals.style.padding = '5px';
+    }
     goals.forEach(async function(goal)
     {
       

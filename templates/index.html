@@ -3,6 +3,7 @@
 {% block content %}
 
     <script src="/static/timer.js"></script>
+{% if session["id"] %}
 <div class="position-absolute top-0 start-0 ">
     <div class="btn-group dropend" id="dropdown">
         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
@@ -17,6 +18,7 @@
         </ul>
     </div>
 </div>
+{% endif %}
     <div class="position-absolute top-50 start-50 translate-middle" id="timercontainer">
         
         <div class="d-flex align-items-start ">

@@ -295,6 +295,8 @@ def create_goal():
         title = request.form.get("title")
         if not length or not time:
             return render_template("goals.html", error="Length and time cannot be empty.")
+        if float(length) <= 0:
+            return render_template("goals.html", error="Invalid length.")
         goalId = insert_db("INSERT INTO goals (length, expire, title, startDate) VALUES (?, ?, ?, ?)", (length, time, title, datetime.now()))
         insert_db("INSERT INTO goalsInvites (id, taskID, accepted) VALUES (?, ?, ?)",(session['id'], goalId, 1))
         return redirect("/goals")
@@ -302,9 +304,10 @@ def create_goal():
 @app.route("/invite_goal", methods=["GET", "POST"])
 def invite_goal():
     # id = query_db("SELECT id FROM users WHERE username = ?", (request.form.get("username"),), one=True)
-    # if not id:
-    #     return render_template("goals.html", error="User not found.")
+    
     id = request.form.get("id")
+    if not id:
+        return render_template("goals.html", error="User not found.")
     if query_db("SELECT * FROM goalsInvites WHERE id = ? AND taskID = ?",(int(id), request.form.get("taskID"))):
         return redirect("/goals")
     insert_db("INSERT INTO goalsInvites (id, taskID, accepted) VALUES (?, ?, ?)",(int(id), request.form.get("taskID"), 0))
@@ -326,7 +329,9 @@ def accept_goal_invite():
 def view_goals():
     if session.get('id'):
         ids = query_db("SELECT taskID FROM goalsInvites WHERE id = ? AND accepted = 1", (session['id'],))
-        goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ? AND expire > ?", (i['taskID'], datetime.now() - timedelta(days=5)), one= True) for i in ids]
+        goals = [query_db("SELECT id, length, expire, title FROM goals WHERE id = ? AND expire > ?", (i['taskID'], datetime.now() - timedelta(days=5)), one= True) for i in ids ]
+        goals = [g for g in goals if g is not None]
+
         return jsonify(goals)
     return 'ok'
 
